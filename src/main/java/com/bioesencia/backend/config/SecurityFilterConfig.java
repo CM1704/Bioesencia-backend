@@ -17,7 +17,7 @@ public class SecurityFilterConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable()); // Uso moderno de deshabilitar CSRF
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
