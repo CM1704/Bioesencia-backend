@@ -3,6 +3,7 @@ package com.bioesencia.backend.service;
 import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+
     private final BCryptPasswordEncoder passwordEncoder;
 
     public Usuario registrar(Usuario usuario) {
