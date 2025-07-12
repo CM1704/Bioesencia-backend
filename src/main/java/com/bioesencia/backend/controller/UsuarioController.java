@@ -2,6 +2,7 @@ package com.bioesencia.backend.controller;
 
 import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.service.UsuarioService;
+import com.bioesencia.backend.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RestController
@@ -18,6 +22,7 @@ import java.util.*;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtUtil jwtUtil;
     private final Map<String, UsuarioTemporal> usuariosPendientes = new HashMap<>();
 
     @PostMapping("/pre-registro")
@@ -32,7 +37,7 @@ public class UsuarioController {
 
         String email = usuario.getEmail();
         if (email == null || email.isBlank() || email.length() > 100 ||
-                !email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                !email.matches("^[\\w.-]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ResponseEntity.badRequest().body("Correo inválido o demasiado largo (máx 100 caracteres)");
         }
 
@@ -102,7 +107,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Usuario loginRequest) {
+    public ResponseEntity<?> login(@RequestBody Usuario loginRequest, HttpServletResponse response) {
         Optional<Usuario> optionalUsuario = usuarioService.buscarPorEmail(loginRequest.getEmail());
 
         if (optionalUsuario.isPresent()) {
@@ -110,11 +115,58 @@ public class UsuarioController {
             boolean passwordValida = usuarioService.checkPassword(loginRequest.getPassword(), usuario.getPassword());
 
             if (passwordValida) {
-                return ResponseEntity.ok(usuario);
+
+                String jwt = jwtUtil.generateToken(usuario.getEmail());
+
+                String cookieHeader = String.format(
+                        "jwt=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=None; Secure; Domain=localhost",
+                        jwt, 24*60*60
+                );
+                response.addHeader("Set-Cookie", cookieHeader);
+
+                // Retorna usuario seguro
+                Map<String, Object> safeUser = new HashMap<>();
+                safeUser.put("id", usuario.getId());
+                safeUser.put("nombre", usuario.getNombre());
+                safeUser.put("apellido", usuario.getApellido());
+                safeUser.put("email", usuario.getEmail());
+                safeUser.put("rol", usuario.getRol());
+                return ResponseEntity.ok(safeUser);
             }
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(@CookieValue(value = "jwt", required = false) String jwt) {
+        if (jwt == null || !jwtUtil.isTokenValid(jwt)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
+        }
+        String email = jwtUtil.extractEmail(jwt);
+        Optional<Usuario> optUsuario = usuarioService.buscarPorEmail(email);
+        if (optUsuario.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
+        }
+        Usuario usuario = optUsuario.get();
+        Map<String, Object> safeUser = new HashMap<>();
+        safeUser.put("id", usuario.getId());
+        safeUser.put("nombre", usuario.getNombre());
+        safeUser.put("apellido", usuario.getApellido());
+        safeUser.put("email", usuario.getEmail());
+        safeUser.put("rol", usuario.getRol());
+        return ResponseEntity.ok(safeUser);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // Cambia a true en producción con HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Expira inmediatamente
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping

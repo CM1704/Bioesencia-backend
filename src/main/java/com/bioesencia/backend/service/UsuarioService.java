@@ -1,5 +1,6 @@
 package com.bioesencia.backend.service;
 
+import com.bioesencia.backend.model.RolUsuario;
 import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class UsuarioService {
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setFechaRegistro(LocalDateTime.now());
         usuario.setActivo(true);
+        usuario.setRol(RolUsuario.CLIENTE);
         return usuarioRepository.save(usuario);
     }
 
