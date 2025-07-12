@@ -160,14 +160,11 @@ public class UsuarioController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Cambia a true en producción con HTTPS
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Expira inmediatamente
-        response.addCookie(cookie);
+        String cookieHeader = "jwt=; Path=/; Max-Age=0; HttpOnly; SameSite=None; Secure; Domain=localhost";
+        response.addHeader("Set-Cookie", cookieHeader);
         return ResponseEntity.ok().build();
     }
+
 
     @GetMapping
     public ResponseEntity<List<Usuario>> listar() {
