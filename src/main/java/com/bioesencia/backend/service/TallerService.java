@@ -2,6 +2,7 @@ package com.bioesencia.backend.service;
 
 import com.bioesencia.backend.model.Taller;
 import com.bioesencia.backend.repository.TallerRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,16 +15,19 @@ public class TallerService {
 
     private final TallerRepository tallerRepository;
 
-    public Taller registrar(Taller taller) {
-        taller.setActivo(true);
-        return tallerRepository.save(taller);
-    }
-
-    public List<Taller> listar() {
+    public List<Taller> findAll() {
         return tallerRepository.findAll();
     }
 
-    public Optional<Taller> buscarPorId(Long id) {
+    public Optional<Taller> findById(Long id) {
         return tallerRepository.findById(id);
+    }
+
+    public Taller save(@Valid Taller taller) {
+        return tallerRepository.save(taller);
+    }
+
+    public void deleteById(Long id) {
+        tallerRepository.deleteById(id);
     }
 }
