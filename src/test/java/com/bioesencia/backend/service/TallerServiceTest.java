@@ -46,7 +46,7 @@ public class TallerServiceTest {
         Taller taller = crearTallerDummy();
         when(tallerRepository.save(any(Taller.class))).thenReturn(taller);
 
-        Taller resultado = tallerService.registrar(taller);
+        Taller resultado = tallerService.save(taller); // <-- Cambiado de registrar() a save()
 
         assertNotNull(resultado);
         assertEquals("Meditación Guiada", resultado.getTitulo());
@@ -57,7 +57,7 @@ public class TallerServiceTest {
     void testListarTalleres() {
         when(tallerRepository.findAll()).thenReturn(List.of(crearTallerDummy()));
 
-        List<Taller> lista = tallerService.listar();
+        List<Taller> lista = tallerService.findAll(); // <-- Cambiado de listar() a findAll()
 
         assertFalse(lista.isEmpty());
         assertEquals(1, lista.size());
@@ -68,7 +68,7 @@ public class TallerServiceTest {
         Taller taller = crearTallerDummy();
         when(tallerRepository.findById(1L)).thenReturn(Optional.of(taller));
 
-        Optional<Taller> encontrado = tallerService.buscarPorId(1L);
+        Optional<Taller> encontrado = tallerService.findById(1L); // <-- Cambiado de buscarPorId() a findById()
 
         assertTrue(encontrado.isPresent());
         assertEquals("Meditación Guiada", encontrado.get().getTitulo());
@@ -78,7 +78,7 @@ public class TallerServiceTest {
     void testBuscarPorIdInexistente() {
         when(tallerRepository.findById(999L)).thenReturn(Optional.empty());
 
-        Optional<Taller> resultado = tallerService.buscarPorId(999L);
+        Optional<Taller> resultado = tallerService.findById(999L); // <-- Cambiado de buscarPorId() a findById()
 
         assertTrue(resultado.isEmpty());
     }

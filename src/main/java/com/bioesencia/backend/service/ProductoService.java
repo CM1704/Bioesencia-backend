@@ -5,7 +5,6 @@ import com.bioesencia.backend.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +15,6 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
 
     public Producto registrar(Producto producto) {
-        producto.setFechaCreacion(LocalDateTime.now());
-        producto.setActivo(true);
         return productoRepository.save(producto);
     }
 
@@ -29,7 +26,23 @@ public class ProductoService {
         return productoRepository.findById(id);
     }
 
-    public void eliminar(Long id) {
-        productoRepository.deleteById(id);
+    public Optional<Producto> actualizar(Long id, Producto producto) {
+        return productoRepository.findById(id).map(existing -> {
+            existing.setNombre(producto.getNombre());
+            existing.setDescripcion(producto.getDescripcion());
+            existing.setPrecio(producto.getPrecio());
+            existing.setStock(producto.getStock());
+            existing.setImagenUrl(producto.getImagenUrl());
+            existing.setActivo(producto.isActivo());
+            return productoRepository.save(existing);
+        });
+    }
+
+    public boolean eliminar(Long id) {
+        if (productoRepository.existsById(id)) {
+            productoRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

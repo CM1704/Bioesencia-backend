@@ -2,6 +2,8 @@ package com.bioesencia.backend.service;
 
 import com.bioesencia.backend.model.*;
 import com.bioesencia.backend.repository.CitaRepository;
+import com.bioesencia.backend.repository.UsuarioRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -21,10 +23,7 @@ public class CitaServiceTest {
     @InjectMocks
     private CitaService citaService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    // Removed duplicate setUp() method
 
     private Usuario usuarioDummy() {
         return Usuario.builder()
@@ -43,28 +42,92 @@ public class CitaServiceTest {
                 .servicio("Terapia Reiki")
                 .estado(EstadoCita.AGENDADA)
                 .notas("Primera sesión")
+                .correo("marta@bio.com")
                 .build();
+    }
+
+    private Long usuarioId = 1L;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private EmailService emailService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        citaService = new CitaService(citaRepository, usuarioRepository);
+        // Inject emailService manually since it's @Autowired in the service
+        org.springframework.test.util.ReflectionTestUtils.setField(citaService, "emailService", emailService);
     }
 
     @Test
     void testRegistrarCita() {
         Cita cita = crearCitaDummy();
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioDummy()));
         when(citaRepository.save(any(Cita.class))).thenReturn(cita);
 
-        Cita resultado = citaService.registrar(cita);
+        Cita resultado = citaService.registrar(cita, usuarioId);
 
         assertNotNull(resultado);
         assertEquals("Terapia Reiki", resultado.getServicio());
+        verify(emailService, times(1)).enviarCorreoCita(null, cita);
+    }
+
+    @Test
+    void testRegistrarCitaUsuarioNoExiste() {
+        Cita cita = crearCitaDummy();
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            citaService.registrar(cita, usuarioId);
+        });
+
+        assertEquals("Usuario no encontrado", ex.getMessage());
+        verify(emailService, never()).enviarCorreoCita(null, cita);
     }
 
     @Test
     void testListarCitas() {
         when(citaRepository.findAll()).thenReturn(List.of(crearCitaDummy()));
 
-        List<Cita> citas = citaService.listar();
+        List<Cita> citas = citaService.findAll();
 
         assertEquals(1, citas.size());
         assertEquals(60, citas.get(0).getDuracion());
+    }
+
+
+    @Test
+    void testListarPorUsuario() {
+        when(citaRepository.findByUsuarioId(usuarioId)).thenReturn(List.of(crearCitaDummy()));
+
+        List<Cita> citas = citaService.listarPorUsuario(usuarioId);
+
+        assertEquals(1, citas.size());
+        assertEquals("Terapia Reiki", citas.get(0).getServicio());
+    }
+
+    @Test
+    void testCancelarCitaExistente() {
+        Cita cita = crearCitaDummy();
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
+        when(citaRepository.save(any(Cita.class))).thenReturn(cita);
+
+        citaService.cancelar(5L);
+
+        assertEquals(EstadoCita.CANCELADA, cita.getEstado());
+        verify(citaRepository, times(1)).save(cita);
+    }
+
+    @Test
+    void testCancelarCitaNoExiste() {
+        when(citaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        citaService.cancelar(99L);
+
+        verify(citaRepository, never()).save(any(Cita.class));
     }
 
     @Test

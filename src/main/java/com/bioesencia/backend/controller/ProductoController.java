@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -15,27 +16,43 @@ public class ProductoController {
 
     private final ProductoService productoService;
 
+    // Crear producto
     @PostMapping
-    public ResponseEntity<Producto> registrar(@RequestBody Producto producto) {
+    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
         Producto creado = productoService.registrar(producto);
         return ResponseEntity.status(201).body(creado);
     }
 
+    // Listar todos los productos
     @GetMapping
-    public ResponseEntity<List<Producto>> listar() {
+    public ResponseEntity<List<Producto>> listarProductos() {
         return ResponseEntity.ok(productoService.listar());
     }
 
+    // Buscar producto por ID
     @GetMapping("/{id}")
     public ResponseEntity<Producto> buscarPorId(@PathVariable Long id) {
-        return productoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
+        Optional<Producto> optProducto = productoService.buscarPorId(id);
+        return optProducto.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Actualizar producto
+    @PutMapping("/{id}")
+    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
+        Optional<Producto> actualizado = productoService.actualizar(id, producto);
+        return actualizado.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Eliminar producto
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        productoService.eliminar(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> eliminarProducto(@PathVariable Long id) {
+        boolean eliminado = productoService.eliminar(id);
+        if (eliminado) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
