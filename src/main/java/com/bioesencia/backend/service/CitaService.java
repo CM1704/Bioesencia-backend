@@ -1,8 +1,14 @@
 package com.bioesencia.backend.service;
 
 import com.bioesencia.backend.model.Cita;
+import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.repository.CitaRepository;
+import com.bioesencia.backend.repository.UsuarioRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,13 +18,22 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CitaService {
 
+    @Autowired 
+    private EmailService emailService;
     private final CitaRepository citaRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public Cita registrar(Cita cita) {
-        return citaRepository.save(cita);
+    @Transactional
+    public Cita registrar(Cita cita, Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        cita.setUsuario(usuario);
+        Cita nuevaCita = citaRepository.save(cita); 
+        emailService.enviarCorreoCita(nuevaCita.getUsuario().getEmail(), nuevaCita);
+        return nuevaCita;
     }
 
-    public List<Cita> listar() {
+    public List<Cita> findAll() {
         return citaRepository.findAll();
     }
 

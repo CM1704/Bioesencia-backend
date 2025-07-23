@@ -20,7 +20,7 @@ public class TesterEditarUsuario {
 
     @Test
     public void editarUsuario() {
-        Usuario u = usuarioRepository.findById(1L).orElseThrow();
+        Usuario u = usuarioRepository.findById(2L).orElseThrow();
         u.setNombre("Ana Laura");
         u.setActivo(false);
         usuarioRepository.save(u);

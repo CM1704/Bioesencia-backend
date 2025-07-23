@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 
 @Data
@@ -43,6 +46,7 @@ public class Usuario {
 
     // Relaciones
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Cita> citas;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)

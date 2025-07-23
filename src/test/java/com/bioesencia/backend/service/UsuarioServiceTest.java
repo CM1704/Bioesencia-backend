@@ -12,12 +12,18 @@ import java.util.Optional;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class UsuarioServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    // Agregado por Joseph Gray
+    @Mock
+    private BCryptPasswordEncoder passwordEncoder;
+    // 
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -40,6 +46,11 @@ public class UsuarioServiceTest {
     @Test
     void testRegistrarUsuario() {
         Usuario usuario = crearUsuarioDummy();
+
+        // Agregado por Joseph Gray
+        when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("hashedPassword123"); // 🔐 mock de encode
+        // 
+        
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
         Usuario resultado = usuarioService.registrar(usuario);
@@ -47,6 +58,10 @@ public class UsuarioServiceTest {
         assertNotNull(resultado);
         assertEquals("Carlos", resultado.getNombre());
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
+
+        // Agregado por Joseph Gray
+        verify(passwordEncoder, times(1)).encode("1234"); // ✔️ también verificás que se cifró
+        // 
     }
 
     @Test
@@ -61,9 +76,9 @@ public class UsuarioServiceTest {
     @Test
     void testBuscarPorId() {
         Usuario usuario = crearUsuarioDummy();
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuario));
 
-        Optional<Usuario> encontrado = usuarioService.buscarPorId(1L);
+        Optional<Usuario> encontrado = usuarioService.buscarPorId(2L);
 
         assertTrue(encontrado.isPresent());
         assertEquals("carlos@test.com", encontrado.get().getEmail());

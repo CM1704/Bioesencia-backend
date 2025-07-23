@@ -21,6 +21,7 @@ import java.util.Optional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+
     private final BCryptPasswordEncoder passwordEncoder;
 
     public Usuario registrar(Usuario usuario) {
