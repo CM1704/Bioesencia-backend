@@ -25,17 +25,12 @@ public class CitaService {
 
     @Transactional
     public Cita registrar(Cita cita, Long usuarioId) {
-        try {
-            Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            cita.setUsuario(usuario);
-            Cita nuevaCita = citaRepository.save(cita); // <- Si falla aquí, se lanza una excepción
-            emailService.enviarCorreoCita(nuevaCita.getUsuario().getEmail(), nuevaCita); // Aquí puedes pasar los parámetros necesarios
-            return nuevaCita;
-        } catch (Exception e) {
-            // TODO: handle exception
-            throw new RuntimeException(e.getMessage());
-        }
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        cita.setUsuario(usuario);
+        Cita nuevaCita = citaRepository.save(cita); 
+        emailService.enviarCorreoCita(nuevaCita.getUsuario().getEmail(), nuevaCita);
+        return nuevaCita;
     }
 
     public List<Cita> findAll() {

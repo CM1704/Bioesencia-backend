@@ -170,7 +170,6 @@ public class UsuarioController {
         return ResponseEntity.ok().build();
     }
 
-
     @GetMapping
     public ResponseEntity<List<Usuario>> listar() {
         return ResponseEntity.ok(usuarioService.listar());

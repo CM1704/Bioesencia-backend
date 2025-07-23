@@ -28,8 +28,7 @@ public class CitaController {
         cita.setFechaHora(dto.getFechaHora());
         cita.setNotas(dto.getNotas());
         cita.setServicio(dto.getServicio());
-
-        // Cita citaGuardada = citaService.registrar(cita, dto.getUsuarioId());
+        
         return ResponseEntity.status(201).body(citaService.registrar(cita, dto.getUsuarioId()));
     }
 

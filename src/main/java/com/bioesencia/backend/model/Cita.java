@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.*;
@@ -43,6 +44,6 @@ public class Cita {
     // Relaciones
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference
     private Usuario usuario;
 }
