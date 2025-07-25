@@ -124,7 +124,7 @@ public class CitaServiceTest {
     void testBuscarPorId() {
         when(citaRepository.findById(5L)).thenReturn(Optional.of(crearCitaDummy()));
 
-        Optional<Cita> cita = citaService.buscarPorId(5L);
+        Optional<Cita> cita = citaService.findById(5L);
 
         assertTrue(cita.isPresent());
         assertEquals("Terapia Reiki", cita.get().getServicio());

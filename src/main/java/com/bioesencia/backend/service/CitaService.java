@@ -24,7 +24,7 @@ public class CitaService {
     private EmailService emailService;
     private final CitaRepository citaRepository;
 
-    public Cita registrar(Cita cita ) {
+    public Cita registrar(Cita cita) {
         citaRepository.save(cita); 
         emailService.enviarCorreoCita(cita.getUsuario().getEmail(), cita); 
         return cita;
@@ -34,8 +34,12 @@ public class CitaService {
         return citaRepository.findAll();
     }
 
-    public Optional<Cita> buscarPorId(Long id) {
+    public Optional<Cita> findById(Long id) {
         return citaRepository.findById(id);
+    }
+
+    public void deleteById(Long id) {
+        citaRepository.deleteById(id);
     }
 
     public List<Cita> listarPorUsuario(Long usuarioId) {
