@@ -38,9 +38,6 @@ public class Cita {
     @Lob
     private String notas;
 
-    @NotNull
-    private String correo;
-
     // Relaciones
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)

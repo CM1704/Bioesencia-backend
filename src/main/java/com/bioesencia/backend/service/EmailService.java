@@ -41,14 +41,13 @@ public class EmailService {
             mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
             mensaje.setSubject("Código de verificación");
             mensaje.setText("Tu código de verificación es: " + codigo);
-
+            
             Transport.send(mensaje);
             System.out.println("📧 Correo enviado exitosamente a: " + destinatario);
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             System.out.println("❌ ERROR AL ENVIAR CORREO:");
             e.printStackTrace();
-            throw new RuntimeException("Error al enviar correo: " + e.getMessage(), e);
         }
     }
 
@@ -69,7 +68,6 @@ public class EmailService {
         } catch (Exception e) {
             System.out.println("❌ ERROR AL ENVIAR CORREO:");
             e.printStackTrace();
-            throw new RuntimeException("Error al enviar correo: " + e.getMessage(), e);
         }
     }
 

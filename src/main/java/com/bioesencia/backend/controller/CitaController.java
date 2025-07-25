@@ -2,6 +2,7 @@ package com.bioesencia.backend.controller;
 
 import com.bioesencia.backend.dto.CitaDTO;
 import com.bioesencia.backend.model.Cita;
+import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.service.CitaService;
 
 import jakarta.validation.Valid;
@@ -20,16 +21,8 @@ public class CitaController {
     private final CitaService citaService;
 
     @PostMapping
-    public ResponseEntity<Cita> registrar(@RequestBody CitaDTO dto) {
-        Cita cita = new Cita();
-        cita.setCorreo(dto.getCorreo());
-        cita.setDuracion(dto.getDuracion());
-        cita.setEstado(dto.getEstado());
-        cita.setFechaHora(dto.getFechaHora());
-        cita.setNotas(dto.getNotas());
-        cita.setServicio(dto.getServicio());
-        
-        return ResponseEntity.status(201).body(citaService.registrar(cita, dto.getUsuarioId()));
+    public ResponseEntity<Cita> registrar(@RequestBody Cita cita) {
+        return ResponseEntity.status(201).body(citaService.registrar(cita));
     }
 
     @GetMapping
@@ -38,7 +31,6 @@ public class CitaController {
 
         return citas.stream().map(cita -> {
             CitaDTO dto = new CitaDTO();
-            dto.setCorreo(cita.getCorreo());
             dto.setDuracion(cita.getDuracion());
             dto.setEstado(cita.getEstado());
             dto.setFechaHora(cita.getFechaHora());
