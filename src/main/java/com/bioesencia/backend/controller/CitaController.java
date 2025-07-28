@@ -2,6 +2,8 @@ package com.bioesencia.backend.controller;
 
 import com.bioesencia.backend.dto.CitaDTO;
 import com.bioesencia.backend.model.Cita;
+import com.bioesencia.backend.model.Servicio;
+import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.service.CitaService;
 
 import jakarta.validation.Valid;
@@ -19,44 +21,41 @@ public class CitaController {
 
     private final CitaService citaService;
 
-    @PostMapping
-    public ResponseEntity<Cita> registrar(@RequestBody CitaDTO dto) {
-        Cita cita = new Cita();
-        cita.setCorreo(dto.getCorreo());
-        cita.setDuracion(dto.getDuracion());
-        cita.setEstado(dto.getEstado());
-        cita.setFechaHora(dto.getFechaHora());
-        cita.setNotas(dto.getNotas());
-        cita.setServicio(dto.getServicio());
-        
-        return ResponseEntity.status(201).body(citaService.registrar(cita, dto.getUsuarioId()));
-    }
-
     @GetMapping
-    public List<CitaDTO> listarTodos() {
-        List<Cita> citas = citaService.findAll();
-
-        return citas.stream().map(cita -> {
-            CitaDTO dto = new CitaDTO();
-            dto.setCorreo(cita.getCorreo());
-            dto.setDuracion(cita.getDuracion());
-            dto.setEstado(cita.getEstado());
-            dto.setFechaHora(cita.getFechaHora());
-            dto.setNotas(cita.getNotas());
-            dto.setServicio(cita.getServicio());
-
-            if (cita.getUsuario() != null) {
-                dto.setUsuarioId(cita.getUsuario().getId());
-            }
-
-            return dto;
-        }).collect(Collectors.toList());
+    public List<Cita> listarTodos() {
+        return citaService.findAll(); 
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Cita> buscarPorId(@PathVariable Long id) {
-        return citaService.buscarPorId(id)
+        return citaService.findById(id)
                 .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Cita> registrar(@RequestBody Cita cita) {
+        return ResponseEntity.status(201).body(citaService.registrar(cita));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Cita> actualizar(@PathVariable Long id, @Valid @RequestBody Cita cita) {
+        return citaService.findById(id)
+                .map(actual -> {
+                    cita.setId(id);
+                    Cita actualizado = citaService.registrar(cita);
+                    return ResponseEntity.ok(actualizado);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        return citaService.findById(id)
+                .map(s -> {
+                    citaService.deleteById(id);
+                    return ResponseEntity.noContent().<Void>build();
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 

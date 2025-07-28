@@ -4,7 +4,6 @@ import com.bioesencia.backend.model.*;
 import com.bioesencia.backend.repository.CitaRepository;
 import com.bioesencia.backend.repository.UsuarioRepository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
@@ -42,7 +41,6 @@ public class CitaServiceTest {
                 .servicio("Terapia Reiki")
                 .estado(EstadoCita.AGENDADA)
                 .notas("Primera sesión")
-                .correo("marta@bio.com")
                 .build();
     }
 
@@ -54,21 +52,13 @@ public class CitaServiceTest {
     @Mock
     private EmailService emailService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        citaService = new CitaService(citaRepository, usuarioRepository);
-        // Inject emailService manually since it's @Autowired in the service
-        org.springframework.test.util.ReflectionTestUtils.setField(citaService, "emailService", emailService);
-    }
-
     @Test
     void testRegistrarCita() {
         Cita cita = crearCitaDummy();
         when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioDummy()));
         when(citaRepository.save(any(Cita.class))).thenReturn(cita);
 
-        Cita resultado = citaService.registrar(cita, usuarioId);
+        Cita resultado = citaService.registrar(cita);
 
         assertNotNull(resultado);
         assertEquals("Terapia Reiki", resultado.getServicio());
@@ -81,7 +71,7 @@ public class CitaServiceTest {
         when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> {
-            citaService.registrar(cita, usuarioId);
+            citaService.registrar(cita);
         });
 
         assertEquals("Usuario no encontrado", ex.getMessage());
@@ -134,7 +124,7 @@ public class CitaServiceTest {
     void testBuscarPorId() {
         when(citaRepository.findById(5L)).thenReturn(Optional.of(crearCitaDummy()));
 
-        Optional<Cita> cita = citaService.buscarPorId(5L);
+        Optional<Cita> cita = citaService.findById(5L);
 
         assertTrue(cita.isPresent());
         assertEquals("Terapia Reiki", cita.get().getServicio());
