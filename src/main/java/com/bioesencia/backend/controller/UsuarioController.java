@@ -1,9 +1,12 @@
 package com.bioesencia.backend.controller;
 
 import com.bioesencia.backend.model.Usuario;
+import com.bioesencia.backend.service.EmailService;
 import com.bioesencia.backend.service.UsuarioService;
 import com.bioesencia.backend.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,8 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final JwtUtil jwtUtil;
     private final Map<String, UsuarioTemporal> usuariosPendientes = new HashMap<>();
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping("/pre-registro")
     public ResponseEntity<String> preRegistro(@RequestBody Usuario usuario) {
@@ -58,7 +63,7 @@ public class UsuarioController {
         usuariosPendientes.put(email, new UsuarioTemporal(usuario, codigo));
 
         try {
-            enviarCorreo(email, codigo);
+            emailService.enviarCorreoCodigo(email, codigo);
             return ResponseEntity.ok("Código enviado al correo");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error enviando el correo");
@@ -165,7 +170,6 @@ public class UsuarioController {
         return ResponseEntity.ok().build();
     }
 
-
     @GetMapping
     public ResponseEntity<List<Usuario>> listar() {
         return ResponseEntity.ok(usuarioService.listar());
@@ -176,6 +180,16 @@ public class UsuarioController {
         return usuarioService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(params = "rol")
+    public ResponseEntity<List<Usuario>> listarPorRol(@RequestParam String rol) {
+        try {
+            List<Usuario> usuarios = usuarioService.listarPorRol(rol.toUpperCase());
+            return ResponseEntity.ok(usuarios);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // Clase auxiliar para manejar usuarios temporales en el registro

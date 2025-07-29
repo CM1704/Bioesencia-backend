@@ -2,11 +2,16 @@ package com.bioesencia.backend.controller;
 
 import com.bioesencia.backend.model.Cita;
 import com.bioesencia.backend.service.CitaService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -21,8 +26,8 @@ public class CitaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Cita>> listar() {
-        return ResponseEntity.ok(citaService.listar());
+    public List<Cita> listarTodos() {
+        return citaService.findAll();
     }
 
     @GetMapping("/{id}")
@@ -37,9 +42,31 @@ public class CitaController {
         return ResponseEntity.ok(citaService.listarPorUsuario(usuarioId));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Cita> actualizar(@PathVariable Long id, @RequestBody Cita cita) {
+        return ResponseEntity.ok(citaService.actualizar(id, cita));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        citaService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/cancelar/{id}")
     public ResponseEntity<Void> cancelar(@PathVariable Long id) {
         citaService.cancelar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/usuario-email")
+    public ResponseEntity<Map<String, String>> getUsuarioEmailByCita(@PathVariable Long id) {
+        return citaService.buscarPorId(id)
+                .map(cita -> {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("email", cita.getUsuario() != null ? cita.getUsuario().getEmail() : "");
+                    return ResponseEntity.ok(data);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
