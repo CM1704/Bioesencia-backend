@@ -182,6 +182,16 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping(params = "rol")
+    public ResponseEntity<List<Usuario>> listarPorRol(@RequestParam String rol) {
+        try {
+            List<Usuario> usuarios = usuarioService.listarPorRol(rol.toUpperCase());
+            return ResponseEntity.ok(usuarios);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     // Clase auxiliar para manejar usuarios temporales en el registro
     static class UsuarioTemporal {
         private final Usuario usuario;

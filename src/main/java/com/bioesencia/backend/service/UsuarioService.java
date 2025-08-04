@@ -47,4 +47,11 @@ public class UsuarioService {
     public Optional<Usuario> buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
+    public List<Usuario> listarPorRol(String rol) {
+        try {
+            return usuarioRepository.findByRol(com.bioesencia.backend.model.RolUsuario.valueOf(rol));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Rol no válido: " + rol);
+        }
+    }
 }

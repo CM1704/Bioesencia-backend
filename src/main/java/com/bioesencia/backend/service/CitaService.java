@@ -1,14 +1,11 @@
 package com.bioesencia.backend.service;
 
-import com.bioesencia.backend.dto.CitaDTO;
 import com.bioesencia.backend.model.Cita;
+import com.bioesencia.backend.model.EstadoCita;
 import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.repository.CitaRepository;
 import com.bioesencia.backend.repository.UsuarioRepository;
-
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,18 +55,39 @@ public class CitaService {
         return citaRepository.findById(id);
     }
 
-    public void deleteById(Long id) {
-        citaRepository.deleteById(id);
-    }
-
     public List<Cita> listarPorUsuario(Long usuarioId) {
         return citaRepository.findByUsuarioId(usuarioId);
     }
 
     public void cancelar(Long id) {
         citaRepository.findById(id).ifPresent(cita -> {
-            cita.setEstado(com.bioesencia.backend.model.EstadoCita.CANCELADA);
+            cita.setEstado(EstadoCita.CANCELADA);
             citaRepository.save(cita);
         });
+    }
+
+    public Cita actualizar(Long id, Cita data) {
+        return citaRepository.findById(id).map(cita -> {
+            cita.setFechaHora(data.getFechaHora());
+            cita.setDuracion(data.getDuracion());
+            cita.setServicio(data.getServicio());
+            cita.setEstado(data.getEstado());
+            cita.setNotas(data.getNotas());
+            return citaRepository.save(cita);
+        }).orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+    }
+
+
+    public void eliminar(Long id) {
+        if (!citaRepository.existsById(id)) {
+            throw new IllegalArgumentException("No se encontró la cita con id: " + id);
+        }
+        citaRepository.deleteById(id);
+    }
+
+    public Optional<String> obtenerEmailUsuarioPorCitaId(Long citaId) {
+        return citaRepository.findById(citaId)
+                .map(Cita::getUsuario)
+                .map(Usuario::getEmail);
     }
 }

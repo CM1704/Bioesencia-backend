@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -33,7 +35,7 @@ public class CitaController {
     
     @GetMapping
     public List<Cita> listarTodos() {
-        return citaService.findAll(); 
+        return citaService.findAll();
     }
 
     @GetMapping("/{id}")
@@ -45,34 +47,30 @@ public class CitaController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cita> actualizar(@PathVariable Long id, @Valid @RequestBody Cita cita) {
-        return citaService.findById(id)
-                .map(actual -> {
-                    cita.setId(id);
-                    Cita actualizado = citaService.registrar(cita);
-                    return ResponseEntity.ok(actualizado);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Cita> actualizar(@PathVariable Long id, @RequestBody Cita cita) {
+        return ResponseEntity.ok(citaService.actualizar(id, cita));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        return citaService.findById(id)
-                .map(s -> {
-                    citaService.deleteById(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Cita>> listarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(citaService.listarPorUsuario(usuarioId));
+        citaService.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/cancelar/{id}")
     public ResponseEntity<Void> cancelar(@PathVariable Long id) {
         citaService.cancelar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/usuario-email")
+    public ResponseEntity<Map<String, String>> getUsuarioEmailByCita(@PathVariable Long id) {
+        return citaService.findById(id)
+                .map(cita -> {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("email", cita.getUsuario() != null ? cita.getUsuario().getEmail() : "");
+                    return ResponseEntity.ok(data);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
