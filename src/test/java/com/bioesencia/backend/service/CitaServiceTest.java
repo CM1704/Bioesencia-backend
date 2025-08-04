@@ -62,7 +62,7 @@ public class CitaServiceTest {
 
         assertNotNull(resultado);
         assertEquals("Terapia Reiki", resultado.getServicio());
-        verify(emailService, times(1)).enviarCorreoCita(null, cita);
+        verify(emailService, times(1)).enviarCorreoCita(cita);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class CitaServiceTest {
         });
 
         assertEquals("Usuario no encontrado", ex.getMessage());
-        verify(emailService, never()).enviarCorreoCita(null, cita);
+        verify(emailService, never()).enviarCorreoCita(cita);
     }
 
     @Test

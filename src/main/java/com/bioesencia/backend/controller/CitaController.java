@@ -1,18 +1,17 @@
 package com.bioesencia.backend.controller;
 
-import com.bioesencia.backend.dto.CitaDTO;
 import com.bioesencia.backend.model.Cita;
-import com.bioesencia.backend.model.Servicio;
-import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.service.CitaService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -21,6 +20,17 @@ public class CitaController {
 
     private final CitaService citaService;
 
+    @GetMapping("/horariosDisponibles")
+    public ResponseEntity<List<String>> getHorasDisponibles(@RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        List<String> disponibles = citaService.obtenerHorasDisponibles(fecha);
+        return ResponseEntity.ok(disponibles);
+    }
+    
+    @PostMapping
+    public ResponseEntity<Cita> registrar(@RequestBody Cita cita) {
+        return ResponseEntity.status(201).body(citaService.registrar(cita));
+    }
+    
     @GetMapping
     public List<Cita> listarTodos() {
         return citaService.findAll(); 
@@ -33,10 +43,6 @@ public class CitaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Cita> registrar(@RequestBody Cita cita) {
-        return ResponseEntity.status(201).body(citaService.registrar(cita));
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Cita> actualizar(@PathVariable Long id, @Valid @RequestBody Cita cita) {

@@ -47,15 +47,15 @@ public class EmailService {
 
         } catch (Exception e) {
             System.out.println("❌ ERROR AL ENVIAR CORREO:");
-            e.printStackTrace();
+            e.printStackTrace(); 
         }
     }
 
-    public void enviarCorreoCita(String destinatario, Cita cita) {
+    public void enviarCorreoCita(Cita cita) {
         try {
             Message mensaje = new MimeMessage(createSession());
             mensaje.setFrom(new InternetAddress(username));
-            mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+            mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(cita.getUsuario().getEmail()));
             mensaje.setSubject("Detalles de tu cita");
             mensaje.setText("Detalles de la cita:\n" +
                     "Fecha y hora: " + cita.getFechaHora() + "\n" +
@@ -64,7 +64,7 @@ public class EmailService {
                     "Notas: " + cita.getNotas());
 
             Transport.send(mensaje);
-            System.out.println("📧 Correo de cita enviado exitosamente a: " + destinatario);
+            System.out.println("📧 Correo de cita enviado exitosamente a: " + cita.getUsuario().getEmail());
         } catch (Exception e) {
             System.out.println("❌ ERROR AL ENVIAR CORREO:");
             e.printStackTrace();
