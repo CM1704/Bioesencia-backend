@@ -9,8 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Serial;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,19 +25,25 @@ public class CitaService {
     @Autowired
     private EmailService emailService;
     private final CitaRepository citaRepository;
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+
+    private static final List<String> HORAS_POSIBLES = List.of(
+        "09:00:00", "10:00:00", "11:00:00",
+        "13:00:00", "14:00:00", "15:00:00", "16:00:00"
+    );
+
+    public List<String> obtenerHorasDisponibles(LocalDate fecha) {
+        List<String> horasReservadas = citaRepository.findHorasReservadas(fecha);
+
+        List<String> disponibles = HORAS_POSIBLES.stream()
+            .filter(hora -> !horasReservadas.contains(hora))
+            .collect(Collectors.toList());
+
+        return disponibles;
+    }
 
     public Cita registrar(Cita cita) {
-        if (cita.getUsuario() != null && cita.getUsuario().getId() != null) {
-            Usuario usuarioCompleto = usuarioRepository.findById(cita.getUsuario().getId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado para la cita"));
-            cita.setUsuario(usuarioCompleto);
-        } else {
-            throw new RuntimeException("No se ha asignado un usuario a la cita");
-        }
-        citaRepository.save(cita);
-        emailService.enviarCorreoCita(cita.getUsuario().getEmail(), cita);
+        citaRepository.save(cita); 
+        emailService.enviarCorreoCita(cita); 
         return cita;
     }
 
@@ -39,7 +51,7 @@ public class CitaService {
         return citaRepository.findAll();
     }
 
-    public Optional<Cita> buscarPorId(Long id) {
+    public Optional<Cita> findById(Long id) {
         return citaRepository.findById(id);
     }
 

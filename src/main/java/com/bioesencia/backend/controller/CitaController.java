@@ -5,10 +5,12 @@ import com.bioesencia.backend.service.CitaService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +22,17 @@ public class CitaController {
 
     private final CitaService citaService;
 
+    @GetMapping("/horariosDisponibles")
+    public ResponseEntity<List<String>> getHorasDisponibles(@RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        List<String> disponibles = citaService.obtenerHorasDisponibles(fecha);
+        return ResponseEntity.ok(disponibles);
+    }
+    
     @PostMapping
     public ResponseEntity<Cita> registrar(@RequestBody Cita cita) {
         return ResponseEntity.status(201).body(citaService.registrar(cita));
     }
-
+    
     @GetMapping
     public List<Cita> listarTodos() {
         return citaService.findAll();
@@ -32,15 +40,11 @@ public class CitaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Cita> buscarPorId(@PathVariable Long id) {
-        return citaService.buscarPorId(id)
+        return citaService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Cita>> listarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(citaService.listarPorUsuario(usuarioId));
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Cita> actualizar(@PathVariable Long id, @RequestBody Cita cita) {
@@ -61,7 +65,7 @@ public class CitaController {
 
     @GetMapping("/{id}/usuario-email")
     public ResponseEntity<Map<String, String>> getUsuarioEmailByCita(@PathVariable Long id) {
-        return citaService.buscarPorId(id)
+        return citaService.findById(id)
                 .map(cita -> {
                     Map<String, String> data = new HashMap<>();
                     data.put("email", cita.getUsuario() != null ? cita.getUsuario().getEmail() : "");
