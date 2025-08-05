@@ -27,8 +27,8 @@ public class PdfGeneratorService {
             documento.open();
 
             agregarEncabezado(documento, orden);
-            agregarCliente(documento, orden);
-            agregarTablaProductos(documento, orden);
+            agregarSeccionCliente(documento, orden);
+            agregarSeccionProductos(documento, orden);
 
             documento.close();
             return baos.toByteArray();
@@ -42,120 +42,146 @@ public class PdfGeneratorService {
         tabla.setWidthPercentage(100);
         tabla.setWidths(new float[]{2f, 3f});
 
-        // Logo
+        // Logo (ahora más grande)
         InputStream logoStream = getClass().getResourceAsStream(LOGO_PATH);
         Image logo = Image.getInstance(logoStream.readAllBytes());
-        logo.scaleToFit(100, 100);
+        logo.scaleToFit(120, 120);
         PdfPCell logoCell = new PdfPCell(logo);
         logoCell.setBorder(Rectangle.NO_BORDER);
-        logoCell.setRowspan(2);
+        logoCell.setVerticalAlignment(Element.ALIGN_TOP);
         tabla.addCell(logoCell);
 
-        // Nombre empresa (debajo del logo)
-        PdfPCell nombreEmpresa = new PdfPCell(new Phrase("BIOESENCIA", new Font(Font.HELVETICA, 18, Font.BOLD, new Color(93, 93, 93))));
-        nombreEmpresa.setBorder(Rectangle.NO_BORDER);
-        nombreEmpresa.setHorizontalAlignment(Element.ALIGN_LEFT);
-        tabla.addCell(nombreEmpresa);
+        // Datos de la empresa
+        PdfPCell info = new PdfPCell();
+        info.setBorder(Rectangle.NO_BORDER);
+        info.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-        // Info empresa
-        PdfPTable info = new PdfPTable(1);
-        info.setWidthPercentage(100);
-        info.addCell(celdaTexto("Cédula Jurídica: 1-1058-0435"));
-        info.addCell(celdaTexto("Tel: +506 8362-1394"));
-        info.addCell(celdaTexto("Correo: bioesenciacostarica@gmail.com"));
-        info.addCell(celdaTexto("Código Postal: 10601"));
-        info.addCell(celdaTexto("Orden #: " + orden.getId()));
-        info.addCell(celdaTexto("Fecha: " + orden.getFechaOrden().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
+        Font normal = new Font(Font.HELVETICA, 10);
+        Font negrita = new Font(Font.HELVETICA, 10, Font.BOLD);
 
-        PdfPCell infoCell = new PdfPCell(info);
-        infoCell.setBorder(Rectangle.NO_BORDER);
-        tabla.addCell(infoCell);
+        Paragraph parrafo = new Paragraph();
+        parrafo.add(new Phrase("Cédula: ", negrita));
+        parrafo.add(new Phrase("1-1058-0435\n", normal));
+        parrafo.add(new Phrase("Teléfono: ", negrita));
+        parrafo.add(new Phrase("+506 8362-1394\n", normal));
+        parrafo.add(new Phrase("Correo: ", negrita));
+        parrafo.add(new Phrase("bioesenciacostarica@gmail.com\n", normal));
+        parrafo.add(new Phrase("Código Postal: ", negrita));
+        parrafo.add(new Phrase("10601\n", normal));
+        parrafo.add(new Phrase("Fecha: ", negrita));
+        parrafo.add(new Phrase(orden.getFechaOrden().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normal));
+
+        info.addElement(parrafo);
+        tabla.addCell(info);
 
         doc.add(tabla);
+
+        Paragraph titulo = new Paragraph("BIOESENCIA", new Font(Font.HELVETICA, 14, Font.BOLD, new Color(94, 167, 67)));
+        titulo.setSpacingBefore(10);
+        doc.add(titulo);
         doc.add(Chunk.NEWLINE);
     }
 
-    private void agregarCliente(Document doc, Orden orden) throws Exception {
-        PdfPTable tabla = new PdfPTable(1);
+    private void agregarSeccionCliente(Document doc, Orden orden) throws Exception {
+        Font seccionFont = new Font(Font.HELVETICA, 11, Font.BOLD);
+        Font labelFont = new Font(Font.HELVETICA, 10, Font.BOLD);
+        Font valueFont = new Font(Font.HELVETICA, 10);
+
+        PdfPCell celdaTitulo = new PdfPCell(new Phrase("Datos del Cliente", seccionFont));
+        celdaTitulo.setBackgroundColor(new Color(230, 230, 230));
+        celdaTitulo.setColspan(2);
+        celdaTitulo.setPadding(6);
+
+        PdfPTable tabla = new PdfPTable(2);
         tabla.setWidthPercentage(100);
-        tabla.addCell(crearCeldaTitulo("Cliente"));
-        tabla.addCell(crearCeldaValor("Nombre: " + orden.getUsuario().getNombre() + " " + orden.getUsuario().getApellido()));
-        tabla.addCell(crearCeldaValor("Correo: " + orden.getUsuario().getEmail()));
+        tabla.setWidths(new float[]{1, 1});
+        tabla.addCell(celdaTitulo);
+
+        tabla.addCell(celdaCampo("Nombre:", orden.getUsuario().getNombre() + " " + orden.getUsuario().getApellido(), labelFont, valueFont));
+        tabla.addCell(celdaCampo("Email:", orden.getUsuario().getEmail(), labelFont, valueFont));
+
         doc.add(tabla);
         doc.add(Chunk.NEWLINE);
     }
 
-    private void agregarTablaProductos(Document doc, Orden orden) throws Exception {
+    private void agregarSeccionProductos(Document doc, Orden orden) throws Exception {
+        Font seccionFont = new Font(Font.HELVETICA, 11, Font.BOLD);
+        Font labelFont = new Font(Font.HELVETICA, 10, Font.BOLD);
+        Font valueFont = new Font(Font.HELVETICA, 10);
+
         PdfPTable tabla = new PdfPTable(4);
         tabla.setWidthPercentage(100);
-        tabla.setWidths(new float[]{4, 1.5f, 2, 2});
+        tabla.setWidths(new float[]{3f, 1f, 2f, 2f});
 
-        tabla.addCell(celdaEncabezado("Producto"));
-        tabla.addCell(celdaEncabezado("Cantidad"));
-        tabla.addCell(celdaEncabezado("Precio Unitario"));
-        tabla.addCell(celdaEncabezado("Subtotal"));
+        PdfPCell titulo = new PdfPCell(new Phrase("Productos", seccionFont));
+        titulo.setColspan(4);
+        titulo.setBackgroundColor(new Color(230, 230, 230));
+        titulo.setPadding(6);
+        tabla.addCell(titulo);
+
+        tabla.addCell(encabezado("Producto"));
+        tabla.addCell(encabezado("Cantidad"));
+        tabla.addCell(encabezado("Precio unitario"));
+        tabla.addCell(encabezado("Subtotal"));
 
         double subtotal = 0.0;
-
         for (OrderItem item : orden.getItems()) {
             double sub = item.getCantidad() * item.getPrecioUnitario().doubleValue();
             subtotal += sub;
-
-            tabla.addCell(celdaTexto(item.getProducto().getNombre()));
-            tabla.addCell(celdaTexto(String.valueOf(item.getCantidad())));
-            tabla.addCell(celdaTexto(FORMAT.format(item.getPrecioUnitario())));
-            tabla.addCell(celdaTexto(FORMAT.format(sub)));
+            String nombreProducto = item.getProducto() != null ? item.getProducto().getNombre() : "(sin nombre)";
+            tabla.addCell(celdaNormal(nombreProducto));
+            tabla.addCell(celdaNormal(String.valueOf(item.getCantidad())));
+            tabla.addCell(celdaNormal(FORMAT.format(item.getPrecioUnitario())));
+            tabla.addCell(celdaNormal(FORMAT.format(sub)));
         }
 
-        double impuestos = subtotal * 0.13;
-        double total = subtotal + impuestos;
+        double impuesto = subtotal * 0.13;
+        double total = subtotal + impuesto;
 
-        PdfPCell vacio = new PdfPCell(new Phrase(""));
-        vacio.setColspan(2);
-        vacio.setBorder(Rectangle.NO_BORDER);
-
-        tabla.addCell(vacio);
-        tabla.addCell(celdaTexto("Subtotal:"));
-        tabla.addCell(celdaTexto(FORMAT.format(subtotal)));
-
-        tabla.addCell(vacio);
-        tabla.addCell(celdaTexto("Impuestos:"));
-        tabla.addCell(celdaTexto(FORMAT.format(impuestos)));
-
-        tabla.addCell(vacio);
-        PdfPCell totalCell = new PdfPCell(new Phrase("Total a pagar:", new Font(Font.HELVETICA, 12, Font.BOLD)));
-        totalCell.setBorder(Rectangle.NO_BORDER);
-        tabla.addCell(totalCell);
-        tabla.addCell(celdaTexto(FORMAT.format(total)));
+        tabla.addCell(celdaVacia(2)); tabla.addCell(celdaLabel("Subtotal:")); tabla.addCell(celdaNormal(FORMAT.format(subtotal)));
+        tabla.addCell(celdaVacia(2)); tabla.addCell(celdaLabel("Impuestos:")); tabla.addCell(celdaNormal(FORMAT.format(impuesto)));
+        tabla.addCell(celdaVacia(2));
+        tabla.addCell(new PdfPCell(new Phrase("Total a pagar:", new Font(Font.HELVETICA, 10, Font.BOLD))) {{ setBorder(Rectangle.NO_BORDER); setPadding(4); }});
+        tabla.addCell(new PdfPCell(new Phrase(FORMAT.format(total), new Font(Font.HELVETICA, 10, Font.BOLD))) {{ setPadding(4); }});
 
         doc.add(tabla);
     }
 
-    private PdfPCell celdaEncabezado(String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 12, Font.BOLD, Color.WHITE)));
-        cell.setBackgroundColor(new Color(94, 167, 67));
-        cell.setPadding(6);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        return cell;
-    }
-
-    private PdfPCell celdaTexto(String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 11)));
+    // Utilidades visuales
+    private PdfPCell encabezado(String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 10, Font.BOLD)));
+        cell.setBackgroundColor(new Color(245, 245, 245));
         cell.setPadding(6);
         return cell;
     }
 
-    private PdfPCell crearCeldaTitulo(String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 14, Font.BOLD)));
-        cell.setPaddingBottom(8);
+    private PdfPCell celdaNormal(String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 10)));
+        cell.setPadding(6);
+        return cell;
+    }
+
+    private PdfPCell celdaLabel(String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 10)));
+        cell.setPadding(4);
         cell.setBorder(Rectangle.NO_BORDER);
         return cell;
     }
 
-    private PdfPCell crearCeldaValor(String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, new Font(Font.HELVETICA, 12)));
-        cell.setPaddingBottom(4);
+    private PdfPCell celdaCampo(String label, String value, Font labelFont, Font valueFont) {
+        Paragraph p = new Paragraph();
+        p.add(new Phrase(label + " ", labelFont));
+        p.add(new Phrase(value, valueFont));
+        PdfPCell cell = new PdfPCell(p);
         cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPadding(6);
+        return cell;
+    }
+
+    private PdfPCell celdaVacia(int colspan) {
+        PdfPCell cell = new PdfPCell(new Phrase(""));
+        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setColspan(colspan);
         return cell;
     }
 }
