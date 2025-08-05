@@ -1,5 +1,6 @@
 package com.bioesencia.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -12,6 +13,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @Entity
 @Table(name = "ordenes")
 public class Orden {
@@ -29,11 +32,21 @@ public class Orden {
     @Enumerated(EnumType.STRING)
     private EstadoOrden estado;
 
+    @Column(name = "codigo_orden", nullable = false, unique = true)
+    private String codigoOrden;
+
     // Relaciones
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonBackReference
     private Usuario usuario;
 
     @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL)
     private List<OrderItem> items;
+
+    @PrePersist
+    protected void prePersist() {
+        this.fechaOrden = LocalDateTime.now();
+    }
+
 }

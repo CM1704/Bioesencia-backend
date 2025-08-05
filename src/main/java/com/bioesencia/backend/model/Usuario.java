@@ -50,6 +50,7 @@ public class Usuario {
     private List<Cita> citas;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Orden> ordenes;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)

@@ -37,6 +37,12 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<List<Producto>> listarActivos() {
+        List<Producto> activos = productoService.listarActivos();
+        return ResponseEntity.ok(activos);
+    }
+
     // Actualizar producto
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {

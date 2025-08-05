@@ -28,13 +28,18 @@ public class OrdenController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Orden> buscarPorId(@PathVariable Long id) {
-        return ordenService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Orden orden = ordenService.buscarPorId(id);
+        return ResponseEntity.ok(orden);
     }
 
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<Orden>> listarPorUsuario(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(ordenService.listarPorUsuario(usuarioId));
+    }
+
+    @GetMapping("/codigo/{codigoOrden}")
+    public ResponseEntity<Orden> buscarPorCodigo(@PathVariable String codigoOrden) {
+        Orden orden = ordenService.buscarPorCodigo(codigoOrden);
+        return ResponseEntity.ok(orden);
     }
 }
