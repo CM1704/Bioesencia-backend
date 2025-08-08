@@ -83,6 +83,14 @@ public class OrdenService {
         return ordenGuardada;
     }
 
+    @Transactional
+    public Orden actualizarEstado(Long id, EstadoOrden nuevoEstado) {
+        Orden orden = ordenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+        orden.setEstado(nuevoEstado);
+        return ordenRepository.save(orden);
+    }
+
     public List<Orden> listar() {
         return ordenRepository.findAll();
     }

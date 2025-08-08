@@ -1,6 +1,7 @@
 package com.bioesencia.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -49,4 +50,23 @@ public class Orden {
         this.fechaOrden = LocalDateTime.now();
     }
 
+    @JsonProperty("usuarioId")
+    public Long getUsuarioIdJson() {
+        return (usuario != null) ? usuario.getId() : null;
+    }
+
+    @JsonProperty("usuarioNombre")
+    public String getUsuarioNombreJson() {
+        return (usuario != null) ? usuario.getNombre() : null;
+    }
+
+    @JsonProperty("usuarioApellido")
+    public String getUsuarioApellidoJson() {
+        return (usuario != null) ? usuario.getApellido() : null;
+    }
+
+    @JsonProperty("usuarioEmail")
+    public String getUsuarioEmailJson() {
+        return (usuario != null) ? usuario.getEmail() : null;
+    }
 }
