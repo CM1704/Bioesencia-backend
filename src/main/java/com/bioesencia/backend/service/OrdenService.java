@@ -25,7 +25,7 @@ public class OrdenService {
 
     @Transactional
     public Orden registrar(Orden orden) {
-        // Cargar usuario completo desde DB
+        // Cargar usuario completo desde BD
         Usuario usuarioCompleto = usuarioRepository.findById(orden.getUsuario().getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         orden.setUsuario(usuarioCompleto);
@@ -44,17 +44,15 @@ public class OrdenService {
                 throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
             }
 
-            // Actualiza el stock
+            // Actualizar stock y estado del producto
             producto.setStock(producto.getStock() - item.getCantidad());
-
-            // Solo se desactiva si llega a 0
             if (producto.getStock() == 0) {
                 producto.setActivo(false);
             }
-
             productoRepository.save(producto);
 
             item.setOrden(orden);
+            item.setProducto(producto);
             item.setPrecioUnitario(producto.getPrecio());
 
             BigDecimal cantidad = BigDecimal.valueOf(item.getCantidad());
