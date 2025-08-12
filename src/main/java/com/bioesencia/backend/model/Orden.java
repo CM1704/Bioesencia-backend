@@ -50,5 +50,28 @@ public class Orden {
     @JsonManagedReference("orden-item")
     private List<OrderItem> items;
 
+    @PrePersist
+    protected void prePersist() {
+        this.fechaOrden = LocalDateTime.now();
+    }
 
+    @JsonProperty("usuarioId")
+    public Long getUsuarioIdJson() {
+        return (usuario != null) ? usuario.getId() : null;
+    }
+
+    @JsonProperty("usuarioNombre")
+    public String getUsuarioNombreJson() {
+        return (usuario != null) ? usuario.getNombre() : null;
+    }
+
+    @JsonProperty("usuarioApellido")
+    public String getUsuarioApellidoJson() {
+        return (usuario != null) ? usuario.getApellido() : null;
+    }
+
+    @JsonProperty("usuarioEmail")
+    public String getUsuarioEmailJson() {
+        return (usuario != null) ? usuario.getEmail() : null;
+    }
 }
