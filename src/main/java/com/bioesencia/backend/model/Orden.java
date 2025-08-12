@@ -8,6 +8,10 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 
 @Data
@@ -39,34 +43,12 @@ public class Orden {
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("usuario-orden")
     private Usuario usuario;
 
     @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL)
+    @JsonManagedReference("orden-item")
     private List<OrderItem> items;
 
-    @PrePersist
-    protected void prePersist() {
-        this.fechaOrden = LocalDateTime.now();
-    }
 
-    @JsonProperty("usuarioId")
-    public Long getUsuarioIdJson() {
-        return (usuario != null) ? usuario.getId() : null;
-    }
-
-    @JsonProperty("usuarioNombre")
-    public String getUsuarioNombreJson() {
-        return (usuario != null) ? usuario.getNombre() : null;
-    }
-
-    @JsonProperty("usuarioApellido")
-    public String getUsuarioApellidoJson() {
-        return (usuario != null) ? usuario.getApellido() : null;
-    }
-
-    @JsonProperty("usuarioEmail")
-    public String getUsuarioEmailJson() {
-        return (usuario != null) ? usuario.getEmail() : null;
-    }
 }

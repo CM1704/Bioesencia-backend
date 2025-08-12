@@ -22,6 +22,11 @@ public class CitaController {
 
     private final CitaService citaService;
 
+    @GetMapping("/agendadas/{fecha}/{usuarioId}")
+    public List<Cita> citasAgendadas(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha, @PathVariable Long usuarioId) {
+        return citaService.listarPorUsuarioYFecha(fecha, usuarioId);
+    }
+
     @GetMapping("/horariosDisponibles")
     public ResponseEntity<List<String>> getHorasDisponibles(@RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         List<String> disponibles = citaService.obtenerHorasDisponibles(fecha);
@@ -44,7 +49,6 @@ public class CitaController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Cita> actualizar(@PathVariable Long id, @RequestBody Cita cita) {

@@ -10,6 +10,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import lombok.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,6 +47,6 @@ public class Producto {
 
     // Relaciones
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @JsonManagedReference("producto-order-item")
     private List<OrderItem> items;
 }

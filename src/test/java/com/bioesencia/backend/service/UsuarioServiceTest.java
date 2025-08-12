@@ -76,7 +76,7 @@ public class UsuarioServiceTest {
     @Test
     void testBuscarPorId() {
         Usuario usuario = crearUsuarioDummy();
-        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
         Optional<Usuario> encontrado = usuarioService.buscarPorId(2L);
 

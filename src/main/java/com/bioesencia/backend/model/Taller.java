@@ -7,6 +7,10 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 
 @Data
@@ -46,5 +50,6 @@ public class Taller {
 
     // Relaciones
     @OneToMany(mappedBy = "taller", cascade = CascadeType.ALL)
+    @JsonManagedReference("taller-inscripcion")
     private List<InscripcionTaller> inscripciones;
 }
