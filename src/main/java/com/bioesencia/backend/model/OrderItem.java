@@ -1,8 +1,7 @@
 package com.bioesencia.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-
 import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -21,20 +20,19 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    private Integer cantidad;
-
-    @NotNull
-    private BigDecimal precioUnitario;
-
-    // Relaciones
     @ManyToOne
     @JoinColumn(name = "orden_id", nullable = false)
     @JsonBackReference("orden-item")
     private Orden orden;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "producto_id", nullable = false)
     @JsonBackReference("producto-order-item")
     private Producto producto;
+
+    private int cantidad;
+
+    @Column(name = "precio_unitario")
+    private BigDecimal precioUnitario;
 }
