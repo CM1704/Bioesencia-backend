@@ -54,4 +54,11 @@ public class InscripcionTallerService {
     public List<InscripcionTallerResumenDTO> listarResumenPorTaller(Long tallerId) {
         return inscripcionRepository.findResumenByTallerId(tallerId);
     }
+
+    public void eliminar(Long id) {
+        if (!inscripcionRepository.existsById(id)) {
+            throw new IllegalArgumentException("Inscripción no encontrada");
+        }
+        inscripcionRepository.deleteById(id);
+    }
 }

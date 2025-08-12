@@ -68,4 +68,10 @@ public class InscripcionTallerController {
     public List<InscripcionTallerResumenDTO> resumenPorTaller(@PathVariable Long tallerId) {
         return inscripcionService.listarResumenPorTaller(tallerId);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        inscripcionService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
 }
