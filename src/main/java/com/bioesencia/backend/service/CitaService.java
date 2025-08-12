@@ -4,16 +4,13 @@ import com.bioesencia.backend.model.Cita;
 import com.bioesencia.backend.model.EstadoCita;
 import com.bioesencia.backend.model.Usuario;
 import com.bioesencia.backend.repository.CitaRepository;
-import com.bioesencia.backend.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Serial;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +36,12 @@ public class CitaService {
             .collect(Collectors.toList());
 
         return disponibles;
+    }
+
+    public List<Cita> listarPorUsuarioYFecha(LocalDate fecha, Long usuarioId) {
+        LocalDateTime start = fecha.atStartOfDay();
+        LocalDateTime end = fecha.plusDays(1).atStartOfDay();
+        return citaRepository.findByUsuarioIdAndFecha(usuarioId, start, end);
     }
 
     public Cita registrar(Cita cita) {
@@ -76,7 +79,6 @@ public class CitaService {
             return citaRepository.save(cita);
         }).orElseThrow(() -> new RuntimeException("Cita no encontrada"));
     }
-
 
     public void eliminar(Long id) {
         if (!citaRepository.existsById(id)) {

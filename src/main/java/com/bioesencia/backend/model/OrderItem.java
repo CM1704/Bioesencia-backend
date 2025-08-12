@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 
 @Data
@@ -27,9 +30,11 @@ public class OrderItem {
     // Relaciones
     @ManyToOne
     @JoinColumn(name = "orden_id", nullable = false)
+    @JsonBackReference("orden-item")
     private Orden orden;
 
     @ManyToOne
     @JoinColumn(name = "producto_id", nullable = false)
+    @JsonBackReference("producto-order-item")
     private Producto producto;
 }
