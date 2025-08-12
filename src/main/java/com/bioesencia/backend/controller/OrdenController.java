@@ -1,5 +1,6 @@
 package com.bioesencia.backend.controller;
 
+import com.bioesencia.backend.model.EstadoOrden;
 import com.bioesencia.backend.model.Orden;
 import com.bioesencia.backend.service.OrdenService;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,26 @@ public class OrdenController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Orden> buscarPorId(@PathVariable Long id) {
-        return ordenService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Orden orden = ordenService.buscarPorId(id);
+        return ResponseEntity.ok(orden);
     }
 
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<Orden>> listarPorUsuario(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(ordenService.listarPorUsuario(usuarioId));
+    }
+
+    @GetMapping("/codigo/{codigoOrden}")
+    public ResponseEntity<Orden> buscarPorCodigo(@PathVariable String codigoOrden) {
+        Orden orden = ordenService.buscarPorCodigo(codigoOrden);
+        return ResponseEntity.ok(orden);
+    }
+
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<Orden> actualizarEstado(
+            @PathVariable Long id,
+            @RequestParam("estado") EstadoOrden estado
+    ) {
+        return ResponseEntity.ok(ordenService.actualizarEstado(id, estado));
     }
 }

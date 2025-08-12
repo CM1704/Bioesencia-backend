@@ -22,6 +22,10 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
+    public List<Producto> listarActivos() {
+        return productoRepository.findByActivoTrue();
+    }
+
     public Optional<Producto> buscarPorId(Long id) {
         return productoRepository.findById(id);
     }
@@ -33,7 +37,7 @@ public class ProductoService {
             existing.setPrecio(producto.getPrecio());
             existing.setStock(producto.getStock());
             existing.setImagenUrl(producto.getImagenUrl());
-            existing.setActivo(producto.isActivo());
+            existing.setActivo(producto.getActivo());
             return productoRepository.save(existing);
         });
     }
