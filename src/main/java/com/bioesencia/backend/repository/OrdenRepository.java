@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrdenRepository extends JpaRepository<Orden, Long> {
-
     @Override
     @EntityGraph(attributePaths = "usuario")
     List<Orden> findAll();

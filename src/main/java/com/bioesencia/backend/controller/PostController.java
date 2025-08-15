@@ -26,22 +26,19 @@ public class PostController {
     public List<Post> listarPosts() {
         return postService.listarTodos();
     }
-
-    // Buscar un post por ID
-    @GetMapping("/{id}")
-    public Optional<Post> obtenerPost(@PathVariable Long id) {
-        return postService.buscarPorId(id);
+    
+    @PutMapping("/actualizar/{id}")
+    public Optional<Post> actualizarPost(@PathVariable Long id, @RequestBody Post post) {
+        return postService.actualizar(id, post);
     }
-
-    // Eliminar un post por ID
+    
     @DeleteMapping("/eliminar/{id}")
     public void eliminarPost(@PathVariable Long id) {
         postService.eliminarPorId(id);
     }
 
-    // Actualizar un post existente
-    @PutMapping("/actualizar/{id}")
-    public Optional<Post> actualizarPost(@PathVariable Long id, @RequestBody Post post) {
-        return postService.actualizar(id, post);
+    @GetMapping("/{id}")
+    public Optional<Post> obtenerPost(@PathVariable Long id) {
+        return postService.buscarPorId(id);
     }
 }

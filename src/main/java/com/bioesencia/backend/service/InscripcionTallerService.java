@@ -1,6 +1,5 @@
 package com.bioesencia.backend.service;
 
-import com.bioesencia.backend.dto.InscripcionTallerResumenDTO;
 import com.bioesencia.backend.model.EstadoInscripcion;
 import com.bioesencia.backend.model.InscripcionTaller;
 import com.bioesencia.backend.model.Taller;
@@ -19,12 +18,6 @@ public class InscripcionTallerService {
 
     private final InscripcionTallerRepository inscripcionRepository;
 
-    public List<Taller> listarPorUsuarioYFecha(Long usuarioId, LocalDate fecha) {
-        LocalDateTime start = fecha.atStartOfDay();
-        LocalDateTime end = fecha.plusDays(1).atStartOfDay();
-        return inscripcionRepository.findTalleresByUsuarioIdAndFecha(usuarioId, start, end);
-    }
-    
     public InscripcionTaller registrar(InscripcionTaller inscripcion) {
         inscripcion.setFechaInscripcion(LocalDateTime.now());
         inscripcion.setEstado(EstadoInscripcion.PENDIENTE);
@@ -35,8 +28,21 @@ public class InscripcionTallerService {
         return inscripcionRepository.findAll();
     }
 
+    public void eliminar(Long id) {
+        if (!inscripcionRepository.existsById(id)) {
+            throw new IllegalArgumentException("Inscripción no encontrada");
+        }
+        inscripcionRepository.deleteById(id);
+    }
+
     public Optional<InscripcionTaller> buscarPorId(Long id) {
         return inscripcionRepository.findById(id);
+    }
+
+    public List<Taller> listarPorUsuarioYFecha(Long usuarioId, LocalDate fecha) {
+        LocalDateTime start = fecha.atStartOfDay();
+        LocalDateTime end = fecha.plusDays(1).atStartOfDay();
+        return inscripcionRepository.findTalleresByUsuarioIdAndFecha(usuarioId, start, end);
     }
 
     public List<InscripcionTaller> listarPorUsuario(Long usuarioId) {
@@ -47,11 +53,4 @@ public class InscripcionTallerService {
         return inscripcionRepository.findByTallerId(tallerId);
     }
 
-    public List<InscripcionTallerResumenDTO> listarResumenPorEstadoYFecha(EstadoInscripcion estado, LocalDate fecha) {
-        return inscripcionRepository.findResumenByEstadoAndFecha(estado, fecha);
-    }
-
-    public List<InscripcionTallerResumenDTO> listarResumenPorTaller(Long tallerId) {
-        return inscripcionRepository.findResumenByTallerId(tallerId);
-    }
 }

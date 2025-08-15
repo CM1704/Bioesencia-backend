@@ -84,31 +84,6 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Código incorrecto");
     }
 
-    private void enviarCorreo(String email, String codigo) throws MessagingException {
-        final String username = "biosencia04@gmail.com";
-        final String password = "zcsq iwpe ummc ruji";
-
-        // Configuración de las propiedades del correo
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
-
-        Session session = Session.getInstance(props, new Authenticator() {
-            protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new javax.mail.PasswordAuthentication(username, password);
-            }
-        });
-
-        Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(username));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-        message.setSubject("Código de verificación");
-        message.setText("Tu código de verificación es: " + codigo);
-        Transport.send(message);
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario loginRequest, HttpServletResponse response) {
         Optional<Usuario> optionalUsuario = usuarioService.buscarPorEmail(loginRequest.getEmail());

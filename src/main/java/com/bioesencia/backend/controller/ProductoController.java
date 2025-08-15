@@ -16,42 +16,24 @@ public class ProductoController {
 
     private final ProductoService productoService;
 
-    // Crear producto
     @PostMapping
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
         Producto creado = productoService.registrar(producto);
         return ResponseEntity.status(201).body(creado);
     }
 
-    // Listar todos los productos
     @GetMapping
     public ResponseEntity<List<Producto>> listarProductos() {
         return ResponseEntity.ok(productoService.listar());
     }
 
-    // Buscar producto por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Producto> buscarPorId(@PathVariable Long id) {
-        Optional<Producto> optProducto = productoService.buscarPorId(id);
-        return optProducto.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/activos")
-    public ResponseEntity<List<Producto>> listarActivos() {
-        List<Producto> activos = productoService.listarActivos();
-        return ResponseEntity.ok(activos);
-    }
-
-    // Actualizar producto
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
         Optional<Producto> actualizado = productoService.actualizar(id, producto);
         return actualizado.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        .orElse(ResponseEntity.notFound().build());
     }
-
-    // Eliminar producto
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarProducto(@PathVariable Long id) {
         boolean eliminado = productoService.eliminar(id);
@@ -60,5 +42,18 @@ public class ProductoController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Producto> buscarPorId(@PathVariable Long id) {
+        Optional<Producto> optProducto = productoService.buscarPorId(id);
+        return optProducto.map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/activos")
+    public ResponseEntity<List<Producto>> listarActivos() {
+        List<Producto> activos = productoService.listarActivos();
+        return ResponseEntity.ok(activos);
     }
 }

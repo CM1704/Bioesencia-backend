@@ -15,19 +15,19 @@ public class ServicioService {
 
     private final ServicioRepository servicioRepository;
 
-    public List<Servicio> findAll() {
-        return servicioRepository.findAll();
-    }
-
-    public Optional<Servicio> findById(Long id) {
-        return servicioRepository.findById(id);
-    }
-
     public Servicio save(@Valid Servicio servicio) {
         return servicioRepository.save(servicio);
     }
 
+    public List<Servicio> findAll() {
+        return servicioRepository.findAll();
+    }
+
     public void deleteById(Long id) {
         servicioRepository.deleteById(id);
+    }
+    
+    public Optional<Servicio> findById(Long id) {
+        return servicioRepository.findById(id);
     }
 }

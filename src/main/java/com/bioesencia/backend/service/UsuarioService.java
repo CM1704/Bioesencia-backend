@@ -32,26 +32,27 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    public boolean checkPassword(String rawPassword, String hashedPassword) {
-        return passwordEncoder.matches(rawPassword, hashedPassword);
-    }
-
     public List<Usuario> listar() {
         return usuarioRepository.findAll();
     }
-
+    
     public Optional<Usuario> buscarPorId(Long id) {
         return usuarioRepository.findById(id);
     }
-
+    
     public Optional<Usuario> buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
+
     public List<Usuario> listarPorRol(String rol) {
         try {
             return usuarioRepository.findByRol(com.bioesencia.backend.model.RolUsuario.valueOf(rol));
         } catch (Exception e) {
             throw new IllegalArgumentException("Rol no válido: " + rol);
         }
+    }
+
+    public boolean checkPassword(String rawPassword, String hashedPassword) {
+        return passwordEncoder.matches(rawPassword, hashedPassword);
     }
 }

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CarritoItemRepository extends JpaRepository<CarritoItem, Long> {
-
     @Query("SELECT c FROM CarritoItem c JOIN FETCH c.producto p WHERE c.usuario.id = :usuarioId AND p.activo = true")
     List<CarritoItem> findByUsuarioIdAndProductoActivo(Long usuarioId);
 

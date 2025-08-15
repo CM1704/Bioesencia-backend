@@ -83,6 +83,10 @@ public class OrdenService {
         return ordenGuardada;
     }
 
+    public List<Orden> listar() {
+        return ordenRepository.findAll();
+    }
+
     @Transactional
     public Orden actualizarEstado(Long id, EstadoOrden nuevoEstado) {
         Orden orden = ordenRepository.findById(id)
@@ -91,17 +95,13 @@ public class OrdenService {
         return ordenRepository.save(orden);
     }
 
-    public List<Orden> listar() {
-        return ordenRepository.findAll();
+    public Orden buscarPorId(Long id) {
+        return ordenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
     }
 
     public List<Orden> listarPorUsuario(Long usuarioId) {
         return ordenRepository.findByUsuarioId(usuarioId);
-    }
-
-    public Orden buscarPorId(Long id) {
-        return ordenRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
     }
 
     public Orden buscarPorCodigo(String codigo) {

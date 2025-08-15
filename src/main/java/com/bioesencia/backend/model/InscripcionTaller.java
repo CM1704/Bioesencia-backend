@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.*;
 
@@ -38,5 +39,35 @@ public class InscripcionTaller {
     @JoinColumn(name = "taller_id", nullable = false)
     @JsonBackReference("taller-inscripcion")
     private Taller taller;
+
+    @JsonProperty("tallerId")
+    public Long getTallerIdJson() {
+        return (taller != null) ? taller.getId() : null;
+    }
+
+    @JsonProperty("tallerNombre")
+    public String getTallerNombreJson() {
+        return (taller != null) ? taller.getTitulo() : null;
+    }
+
+    @JsonProperty("usuarioId")
+    public Long getUsuarioIdJson() {
+        return (usuario != null) ? usuario.getId() : null;
+    }
+
+    @JsonProperty("usuarioNombre")
+    public String getUsuarioNombreJson() {
+        return (usuario != null) ? usuario.getNombre() : null;
+    }
+
+    @JsonProperty("usuarioApellido")
+    public String getUsuarioApellidoJson() {
+        return (usuario != null) ? usuario.getApellido() : null;
+    }
+
+    @JsonProperty("usuarioEmail")
+    public String getUsuarioEmailJson() {
+        return (usuario != null) ? usuario.getEmail() : null;
+    }
 
 }

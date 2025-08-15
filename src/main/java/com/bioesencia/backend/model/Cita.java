@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.*;
@@ -45,4 +46,14 @@ public class Cita {
     @JoinColumn(name = "usuario_id", nullable = false)
     @JsonBackReference("usuario-cita")
     private Usuario usuario;
+
+    @JsonProperty("usuarioNombre")
+    public String getUsuarioNombreJson() {
+        return (usuario != null) ? usuario.getNombre() : null;
+    }
+
+    @JsonProperty("usuarioCorreo")
+    public String getUsuarioCorreoJson() {
+        return (usuario != null) ? usuario.getEmail() : null;
+    }
 }

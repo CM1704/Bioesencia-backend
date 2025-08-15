@@ -22,12 +22,20 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
-    public List<Producto> listarActivos() {
-        return productoRepository.findByActivoTrue();
+    public boolean eliminar(Long id) {
+        if (productoRepository.existsById(id)) {
+            productoRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public Optional<Producto> buscarPorId(Long id) {
         return productoRepository.findById(id);
+    }
+
+    public List<Producto> listarActivos() {
+        return productoRepository.findByActivoTrue();
     }
 
     public Optional<Producto> actualizar(Long id, Producto producto) {
@@ -40,13 +48,5 @@ public class ProductoService {
             existing.setActivo(producto.getActivo());
             return productoRepository.save(existing);
         });
-    }
-
-    public boolean eliminar(Long id) {
-        if (productoRepository.existsById(id)) {
-            productoRepository.deleteById(id);
-            return true;
-        }
-        return false;
     }
 }
