@@ -13,7 +13,6 @@ import java.util.List;
 
 @Repository
 public interface CitaRepository extends JpaRepository<Cita, Long> {
-
     List<Cita> findByUsuarioId(Long usuarioId);
 
     @Query(value = "SELECT TIME(c.fecha_hora) FROM citas c WHERE DATE(c.fecha_hora) = :fecha", nativeQuery = true)

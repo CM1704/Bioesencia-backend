@@ -16,42 +16,42 @@ public class TallerController {
 
     private final TallerService tallerService;
 
-    @GetMapping
-    public List<Taller> listarTodos() {
-        return tallerService.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Taller> obtenerPorId(@PathVariable Long id) {
-        return tallerService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
     public ResponseEntity<Taller> crear(@Valid @RequestBody Taller taller) {
         Taller creado = tallerService.save(taller);
         return ResponseEntity.ok(creado);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Taller> actualizar(@PathVariable Long id, @Valid @RequestBody Taller taller) {
-        return tallerService.findById(id)
-                .map(actual -> {
-                    taller.setId(id); // Asegura que el ID es correcto
-                    Taller actualizado = tallerService.save(taller);
-                    return ResponseEntity.ok(actualizado);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping
+    public List<Taller> listarTodos() {
+        return tallerService.findAll();
     }
 
+@PutMapping("/{id}")
+    public ResponseEntity<Taller> actualizar(@PathVariable Long id, @Valid @RequestBody Taller taller) {
+        return tallerService.findById(id)
+        .map(actual -> {
+            taller.setId(id); // Asegura que el ID es correcto
+            Taller actualizado = tallerService.save(taller);
+            return ResponseEntity.ok(actualizado);
+        })
+        .orElse(ResponseEntity.notFound().build());
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         return tallerService.findById(id)
-                .map(t -> {
-                    tallerService.deleteById(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
+        .map(t -> {
+            tallerService.deleteById(id);
+            return ResponseEntity.noContent().<Void>build();
+        })
+        .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Taller> obtenerPorId(@PathVariable Long id) {
+        return tallerService.findById(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 }

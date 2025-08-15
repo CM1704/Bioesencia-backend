@@ -2,6 +2,9 @@ package com.bioesencia.backend.service;
 
 import com.bioesencia.backend.model.Post;
 import com.bioesencia.backend.repository.PostRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,14 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
-
-    @Autowired
-    public PostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
 
     // Crear nuevo post
     public Post crear(Post post) {
@@ -28,11 +27,6 @@ public class PostService {
     // Listar todos los posts
     public List<Post> listarTodos() {
         return postRepository.findAll();
-    }
-
-    // Buscar un post por ID
-    public Optional<Post> buscarPorId(Long id) {
-        return postRepository.findById(id);
     }
 
     // Actualizar un post existente
@@ -49,5 +43,10 @@ public class PostService {
     // Eliminar un post por ID
     public void eliminarPorId(Long id) {
         postRepository.deleteById(id);
+    }
+
+    // Buscar un post por ID
+    public Optional<Post> buscarPorId(Long id) {
+        return postRepository.findById(id);
     }
 }

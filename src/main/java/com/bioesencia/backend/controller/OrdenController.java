@@ -27,6 +27,14 @@ public class OrdenController {
         return ResponseEntity.ok(ordenService.listar());
     }
 
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<Orden> actualizarEstado(
+            @PathVariable Long id,
+            @RequestParam("estado") EstadoOrden estado
+    ) {
+        return ResponseEntity.ok(ordenService.actualizarEstado(id, estado));
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<Orden> buscarPorId(@PathVariable Long id) {
         Orden orden = ordenService.buscarPorId(id);
@@ -44,11 +52,4 @@ public class OrdenController {
         return ResponseEntity.ok(orden);
     }
 
-    @PutMapping("/{id}/estado")
-    public ResponseEntity<Orden> actualizarEstado(
-            @PathVariable Long id,
-            @RequestParam("estado") EstadoOrden estado
-    ) {
-        return ResponseEntity.ok(ordenService.actualizarEstado(id, estado));
-    }
 }

@@ -15,19 +15,19 @@ public class TallerService {
 
     private final TallerRepository tallerRepository;
 
-    public List<Taller> findAll() {
-        return tallerRepository.findAll();
-    }
-
-    public Optional<Taller> findById(Long id) {
-        return tallerRepository.findById(id);
-    }
-
     public Taller save(@Valid Taller taller) {
         return tallerRepository.save(taller);
     }
 
+    public List<Taller> findAll() {
+        return tallerRepository.findAll();
+    }
+
     public void deleteById(Long id) {
         tallerRepository.deleteById(id);
+    }
+
+    public Optional<Taller> findById(Long id) {
+        return tallerRepository.findById(id);
     }
 }
