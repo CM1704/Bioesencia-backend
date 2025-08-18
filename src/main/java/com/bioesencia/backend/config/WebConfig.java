@@ -1,6 +1,5 @@
 package com.bioesencia.backend.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -11,10 +10,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000")
+                .allowedOriginPatterns("http://localhost:3000") // igual que allowedOrigins, pero más flexible
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true)
-                .exposedHeaders("Set-Cookie");
+                .exposedHeaders("Set-Cookie")
+                .allowCredentials(true);
     }
 }
