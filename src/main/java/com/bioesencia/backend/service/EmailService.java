@@ -8,6 +8,7 @@ import javax.activation.DataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.util.ByteArrayDataSource;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Service
@@ -54,12 +55,28 @@ public class EmailService {
             Message mensaje = new MimeMessage(createSession());
             mensaje.setFrom(new InternetAddress(username));
             mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(cita.getUsuario().getEmail()));
-            mensaje.setSubject("Detalles de tu cita");
-            mensaje.setText("Detalles de la cita:\n" +
-                    "Fecha y hora: " + cita.getFechaHora() + "\n" +
-                    "Duración: " + cita.getDuracion() + " minutos\n" +
-                    "Servicio: " + cita.getServicio() + "\n" +
-                    "Notas: " + cita.getNotas());
+            mensaje.setSubject("¡Tu cita ha sido agendada!");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+            String fechaHoraFormateada = cita.getFechaHora().format(formatter);
+
+            String cuerpo = String.join("\n",
+                "¡Hola " + cita.getUsuario().getNombre() + "!",
+                "",
+                "Tu cita ha sido registrada exitosamente.",
+                "",
+                "Detalles de la cita:",
+                "• Fecha y hora: " + fechaHoraFormateada,
+                "• Duración: " + cita.getDuracion() + " minutos",
+                "• Servicio: " + cita.getServicio(),
+                "• Notas: " + (cita.getNotas() != null ? cita.getNotas() : "Sin notas"),
+                "",
+                "Si tienes alguna consulta, responde a este correo.",
+                "",
+                "¡Te esperamos!"
+            );
+
+            mensaje.setText(cuerpo);
 
             Transport.send(mensaje);
             System.out.println("📧 Correo de cita enviado exitosamente a: " + cita.getUsuario().getEmail());
