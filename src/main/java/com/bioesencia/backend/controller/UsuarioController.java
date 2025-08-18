@@ -1,19 +1,14 @@
 package com.bioesencia.backend.controller;
 
 import com.bioesencia.backend.model.Usuario;
+import com.bioesencia.backend.security.JwtUtil;
 import com.bioesencia.backend.service.EmailService;
 import com.bioesencia.backend.service.UsuarioService;
-import com.bioesencia.backend.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 
@@ -24,31 +19,26 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
     private final Map<String, UsuarioTemporal> usuariosPendientes = new HashMap<>();
-    @Autowired
-    private EmailService emailService;
 
     @PostMapping("/pre-registro")
     public ResponseEntity<String> preRegistro(@RequestBody Usuario usuario) {
         if (usuario.getNombre() == null || usuario.getNombre().isBlank() || usuario.getNombre().length() > 50) {
             return ResponseEntity.badRequest().body("Nombre requerido y máximo 50 caracteres");
         }
-
         if (usuario.getApellido() == null || usuario.getApellido().isBlank() || usuario.getApellido().length() > 50) {
             return ResponseEntity.badRequest().body("Apellido requerido y máximo 50 caracteres");
         }
-
         String email = usuario.getEmail();
         if (email == null || email.isBlank() || email.length() > 100 ||
                 !email.matches("^[\\w.-]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ResponseEntity.badRequest().body("Correo inválido o demasiado largo (máx 100 caracteres)");
         }
-
         // Verificar si el correo ya existe
         if (usuarioService.buscarPorEmail(email).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe una cuenta registrada con este correo.");
         }
-
         String password = usuario.getPassword();
         if (password == null || password.isBlank() || password.length() > 60 ||
                 !password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&.#_-])[A-Za-z\\d@$!%*?&.#_-]{8,}$")) {
@@ -56,8 +46,7 @@ public class UsuarioController {
                     "Contraseña débil. Debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y un carácter especial.");
         }
 
-        // Aqui se genera el codigo y se guarda en memoria
-        String codigo = String.format("%06d", new Random().nextInt(1000000));
+        String codigo = String.format("%06d", new Random().nextInt(1_000_000));
         usuariosPendientes.put(email, new UsuarioTemporal(usuario, codigo));
 
         try {
@@ -74,35 +63,34 @@ public class UsuarioController {
         String codigoIngresado = request.get("codigo");
 
         UsuarioTemporal temporal = usuariosPendientes.get(email);
-
         if (temporal != null && temporal.getCodigo().equals(codigoIngresado)) {
             Usuario creado = usuarioService.registrar(temporal.getUsuario());
             usuariosPendientes.remove(email);
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         }
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Código incorrecto");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario loginRequest, HttpServletResponse response) {
         Optional<Usuario> optionalUsuario = usuarioService.buscarPorEmail(loginRequest.getEmail());
-
         if (optionalUsuario.isPresent()) {
             Usuario usuario = optionalUsuario.get();
             boolean passwordValida = usuarioService.checkPassword(loginRequest.getPassword(), usuario.getPassword());
-
             if (passwordValida) {
-
                 String jwt = jwtUtil.generateToken(usuario.getEmail());
 
-                String cookieHeader = String.format(
-                        "jwt=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=None; Secure; Domain=localhost",
-                        jwt, 24*60*60
-                );
-                response.addHeader("Set-Cookie", cookieHeader);
+                boolean isProd = false;
 
-                // Retorna usuario seguro
+                ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
+                        .path("/")
+                        .httpOnly(true)
+                        .maxAge(24 * 60 * 60)
+                        .secure(isProd)
+                        .sameSite(isProd ? "None" : "Lax")
+                        .build();
+                response.addHeader("Set-Cookie", cookie.toString());
+
                 Map<String, Object> safeUser = new HashMap<>();
                 safeUser.put("id", usuario.getId());
                 safeUser.put("nombre", usuario.getNombre());
@@ -112,7 +100,6 @@ public class UsuarioController {
                 return ResponseEntity.ok(safeUser);
             }
         }
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
     }
 
@@ -138,8 +125,16 @@ public class UsuarioController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        String cookieHeader = "jwt=; Path=/; Max-Age=0; HttpOnly; SameSite=None; Secure; Domain=localhost";
-        response.addHeader("Set-Cookie", cookieHeader);
+        // Borra la cookie
+        boolean isProd = false;
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .path("/")
+                .httpOnly(true)
+                .maxAge(0)
+                .secure(isProd)
+                .sameSite(isProd ? "None" : "Lax")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
         return ResponseEntity.ok().build();
     }
 
@@ -165,7 +160,6 @@ public class UsuarioController {
         }
     }
 
-    // Clase auxiliar para manejar usuarios temporales en el registro
     static class UsuarioTemporal {
         private final Usuario usuario;
         private final String codigo;
