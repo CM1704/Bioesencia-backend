@@ -1,6 +1,7 @@
 package com.bioesencia.backend.service;
 
 import com.bioesencia.backend.model.Cita;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
@@ -14,15 +15,30 @@ import java.util.Properties;
 @Service
 public class EmailService {
 
-    private final String username = "biosencia04@gmail.com";
-    private final String password = "zcsq iwpe ummc ruji"; // App password
+    @Value("${spring.mail.username}")
+    private String username;
+
+    @Value("${spring.mail.password}")
+    private String password;
+
+    @Value("${spring.mail.properties.mail.smtp.auth}")
+    private String auth;
+    
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
+    private String starttls;
+    
+    @Value("${spring.mail.host}")
+    private String host;
+
+    @Value("${spring.mail.port}")
+    private String port;
 
     private Properties getMailProperties() {
         Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", auth);
+        props.put("mail.smtp.starttls.enable", starttls);
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", port);
         return props;
     }
 
