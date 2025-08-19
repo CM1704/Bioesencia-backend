@@ -1,6 +1,7 @@
 package com.bioesencia.backend.service;
 
 import com.bioesencia.backend.model.Cita;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
@@ -8,20 +9,36 @@ import javax.activation.DataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.util.ByteArrayDataSource;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Service
 public class EmailService {
 
-    private final String username = "biosencia04@gmail.com";
-    private final String password = "zcsq iwpe ummc ruji"; // App password
+    @Value("${spring.mail.username}")
+    private String username;
+
+    @Value("${spring.mail.password}")
+    private String password;
+
+    @Value("${spring.mail.properties.mail.smtp.auth}")
+    private String auth;
+    
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
+    private String starttls;
+    
+    @Value("${spring.mail.host}")
+    private String host;
+
+    @Value("${spring.mail.port}")
+    private String port;
 
     private Properties getMailProperties() {
         Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", auth);
+        props.put("mail.smtp.starttls.enable", starttls);
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", port);
         return props;
     }
 
@@ -54,12 +71,28 @@ public class EmailService {
             Message mensaje = new MimeMessage(createSession());
             mensaje.setFrom(new InternetAddress(username));
             mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(cita.getUsuario().getEmail()));
-            mensaje.setSubject("Detalles de tu cita");
-            mensaje.setText("Detalles de la cita:\n" +
-                    "Fecha y hora: " + cita.getFechaHora() + "\n" +
-                    "Duración: " + cita.getDuracion() + " minutos\n" +
-                    "Servicio: " + cita.getServicio() + "\n" +
-                    "Notas: " + cita.getNotas());
+            mensaje.setSubject("¡Tu cita ha sido agendada!");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+            String fechaHoraFormateada = cita.getFechaHora().format(formatter);
+
+            String cuerpo = String.join("\n",
+                "¡Hola " + cita.getUsuario().getNombre() + "!",
+                "",
+                "Tu cita ha sido registrada exitosamente.",
+                "",
+                "Detalles de la cita:",
+                "• Fecha y hora: " + fechaHoraFormateada,
+                "• Duración: " + cita.getDuracion() + " minutos",
+                "• Servicio: " + cita.getServicio(),
+                "• Notas: " + (cita.getNotas() != null ? cita.getNotas() : "Sin notas"),
+                "",
+                "Si tienes alguna consulta, responde a este correo.",
+                "",
+                "¡Te esperamos!"
+            );
+
+            mensaje.setText(cuerpo);
 
             Transport.send(mensaje);
             System.out.println("📧 Correo de cita enviado exitosamente a: " + cita.getUsuario().getEmail());
